@@ -8,32 +8,7 @@ import cv2
 import glob as glob
 import numpy as np
 import torch
-
-HOST = "192.168.1.154"  # Standard loopback interface address (localhost)
-PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
-
-extension = "png"
-image_name = "pythonimage."+extension
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-condition = True
-s.connect((HOST, PORT))
-f = open(s,"wb")
-s.listen(1)
-while condition:
-    image = s.recv(1024)
-    if str(image) == "b''":
-        condition = False
-    f.write(image)
-# inferencing on CPU
-device = 'cpu'
-# initialize the VGG11 model
-model = VGG11(in_channels=1, num_classes=10)
-# load the model checkpoint
-checkpoint = torch.load('model.pth')
-# load the trained weights
-model.load_state_dict(checkpoint['model_state_dict'])
-model.to(device)
-model.eval()
+from PIL import Image
 
 # simple image transforms
 transform = transforms.Compose([
@@ -44,22 +19,8 @@ transform = transforms.Compose([
                          std=[0.5])
 ])
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST, PORT))
-    
-s.listen(1)
-conn, addr = s.accept()
-    #with conn:
-     #   print(f"Connected by {addr}")
-      #  while True:
-         #   data = conn.recv(1024)
-          #  if not data:
-           #     break
-          #  conn.sendall(data)
-if conn != 0:
-    for i in image:
-        conn.send(i)
-
+extension = "png"
+image_name = "pythonimage."+extension
 def results():
     # get all the test images path
     image_paths = glob.glob(image_name)
@@ -82,4 +43,50 @@ def results():
     # show and save the resutls
         cv2.imshow('Result', orig_img)
         cv2.waitKey(0)
-        cv2.imwrite(f"result_{i}.jpg", orig_img)
+        cv2.imwrite(f"result_{i}."+extension, orig_img)
+        return "result_0."+extension
+
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+condition = True
+s.connect((HOST, PORT))
+f = open(s,"wb")
+s.listen(1)
+while condition:
+    image = s.recv(1024)
+    if str(image) == "b''":
+        condition = False
+    f.write(image)
+# inferencing on CPU
+device = 'cpu'
+# initialize the VGG11 model
+model = VGG11(in_channels=1, num_classes=10)
+# load the model checkpoint
+checkpoint = torch.load('model.pth')
+# load the trained weights
+model.load_state_dict(checkpoint['model_state_dict'])
+model.to(device)
+model.eval()
+
+
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((HOST, PORT))
+    
+s.listen(1)
+image = Image(results())
+conn, addr = s.accept()
+    #with conn:
+     #   print(f"Connected by {addr}")
+      #  while True:
+         #   data = conn.recv(1024)
+          #  if not data:
+           #     break
+          #  conn.sendall(data)
+if conn != 0:
+    for i in image:
+        conn.send(i)
+
