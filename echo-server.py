@@ -46,14 +46,16 @@ def results():
         cv2.imwrite(f"result_{i}."+extension, orig_img)
         return "result_0."+extension
 
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+HOST = "192.168.1.154"  # Standard loopback interface address (localhost)
+PORT = 4567  # Port to listen on (non-privileged ports are > 1023)
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 condition = True
-s.connect((HOST, PORT))
-f = open(s,"wb")
+s.bind((HOST, PORT))
+s.listen()
+conn, addr = s.accept()
+f = open(image_name,"wb")
 s.listen(1)
 while condition:
     image = s.recv(1024)

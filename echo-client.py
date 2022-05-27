@@ -2,13 +2,14 @@
 from tkinter import filedialog
 import socket
 
-HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+HOST = "192.168.1.154"  # The server's hostname or IP address
+PORT = 4567  # The port used by the server
 extension = "png"
 image_name = "pythonimage."+extension
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 condition = True #Receives Image
 s.connect((HOST, PORT))
+
 f = open(s,"wb")
 data = filedialog.askopenfile(initialdir="/documents/")#Sent Image Directory
 path = str(data.name)
