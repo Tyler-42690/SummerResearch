@@ -1,35 +1,30 @@
 # echo-client.py
-from tkinter import filedialog
-import socket
 
-HOST = "192.168.1.154"  # The server's hostname or IP address
+import socket
+BUFFER_SIZE = 4096
+#HOST = "192.168.1.154"  # The server's hostname or IP address
+HOST = "127.0.0.1" #Localhost if needed 
 PORT = 4567  # The port used by the server
 extension = "png"
 image_name = "pythonimage."+extension
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 condition = True #Receives Image
-s.connect((HOST, PORT))
+client_socket.connect((HOST, PORT))
 
-f = open(s,"wb")
-data = filedialog.askopenfile(initialdir="/documents/")#Sent Image Directory
-path = str(data.name)
-image = open(path,"rb")
-conn, addr = s.accept() #Sends image
-    #with conn:
-     #   print(f"Connected by {addr}")
-      #  while True:
-         #   data = conn.recv(1024)
-          #  if not data:
-           #     break
-          #  conn.sendall(data)
-if conn != 0:
-    for i in image:
-        conn.send(i)
+with open('documents/9.png', 'rb') as file:
+    file_data = file.read(BUFFER_SIZE)
+    while file_data:
+        client_socket.send(file_data)
+        file_data = file.read(BUFFER_SIZE)
 
-s.listen(1)
+client_socket.send(b"%IMAGE_COMPLETED%")
+
 #Receives Modified Image Scored by AI
-while condition:
-    image = s.recv(1024)
-    if str(image) == "b''":
-        condition = False
-    f.write(image)
+with open('documents/edited.png', 'wb') as file:
+    recv_data = client_socket.recv(BUFFER_SIZE)
+    while recv_data:
+        file.write(recv_data)
+        recv_data = client_socket.recv(BUFFER_SIZE)
+
+        if recv_data == b"%IMAGE_COMPLETED%":
+            break
