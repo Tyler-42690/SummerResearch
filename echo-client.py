@@ -1,6 +1,8 @@
 # echo-client.py
-
+import time
 import socket
+
+start = time.time()
 BUFFER_SIZE = 4096
 #HOST = "192.168.1.154"  # The server's hostname or IP address
 HOST = "127.0.0.1" #Localhost if needed 
@@ -28,3 +30,5 @@ with open('documents/edited.png', 'wb') as file:
 
         if recv_data == b"%IMAGE_COMPLETED%":
             break
+end = time.time()
+print("Runtime = "+str(end-start))
