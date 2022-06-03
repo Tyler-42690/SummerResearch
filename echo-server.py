@@ -3,14 +3,13 @@ import time
 import sys
 import socket
 import io
-from tkinter import filedialog
 import VGG11
 import torchvision.transforms as transforms
 import cv2
-import glob as glob
+#import glob as glob
 import numpy as np
 import torch
-from PIL import Image, ImageFilter
+from PIL import Image
 
 # simple image transforms
 transform = transforms.Compose([
@@ -67,7 +66,7 @@ checkpoint = torch.load('model.pth')
 model.load_state_dict(checkpoint['model_state_dict'])
 model.to(device)
 model.eval()
-
+start3 = time.time()
 orig_img = cv2.imread('clientfiles/pythonimage.png')
     # convert to grayscale to make the image single channel
         
@@ -76,10 +75,14 @@ image1 = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
 image1 = transform(image1)
     # add one extra batch dimension
 image1 = image1.unsqueeze(0).to(device)
+end = time.time()
+print("Model pre-processing time: " + str(end-start3)+ " seconds.")
     # forward pass the image through the model
+start4 = time.time()
 outputs = model(image1)
 end = time.time()
-print("Model processing time: " + str(end-start1)+ " seconds.")
+print("Model processing time: " + str(end-start4)+ " seconds.")
+#print("Model processing time: " + str(end-start1)+ " seconds.")
     # get the index of the highest score
     # the highest scoring indicates the label for the Digit MNIST dataset
 label = np.array(outputs.detach()).argmax()
@@ -113,8 +116,8 @@ file.close()
           #  if not data:
            #     break
           #  conn.sendall(data)
-#client.close()
-#server.close()
+client.close()
+server.close()
 end = time.time()
 print("Text file transfer time: " + str(end-start2)+" seconds.")
 print("Runtime: "+str(end-start)+" seconds.")

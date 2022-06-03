@@ -1,7 +1,7 @@
 # echo-client.py
 import time
 import socket
-
+import torchvision.transforms as transforms
 
 BUFFER_SIZE = 4096
 #HOST = "192.168.1.154"  # The server's hostname or IP address
@@ -10,7 +10,7 @@ PORT = 4567  # The port used by the server
 extension = "png"
 image_name = "pythonimage."+extension
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-condition = True #Receives Image
+#condition = True #Receives Image
 client_socket.connect((HOST, PORT))
 
 with open('documents/9.png', 'rb') as file:
@@ -22,7 +22,7 @@ start = time.time()
 client_socket.send(b"%IMAGE_COMPLETED%")
 
 #Receives Modified Image Scored by AI
-with open('documents/edited.png', 'wb') as file:
+with open('documents/output.txt', 'wb') as file:
     recv_data = client_socket.recv(BUFFER_SIZE)
     while recv_data:
         file.write(recv_data)
