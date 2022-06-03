@@ -2,7 +2,7 @@
 import time
 import socket
 
-start = time.time()
+
 BUFFER_SIZE = 4096
 #HOST = "192.168.1.154"  # The server's hostname or IP address
 HOST = "127.0.0.1" #Localhost if needed 
@@ -18,7 +18,7 @@ with open('documents/9.png', 'rb') as file:
     while file_data:
         client_socket.send(file_data)
         file_data = file.read(BUFFER_SIZE)
-
+start = time.time()
 client_socket.send(b"%IMAGE_COMPLETED%")
 
 #Receives Modified Image Scored by AI
