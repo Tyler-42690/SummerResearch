@@ -1,3 +1,18 @@
 {
-    "makefile.extensionOutputFolder": "./.vscode"
+    "makefile.extensionOutputFolder": "./.vscode",
+    "cSpell.words": [
+        "argmax",
+        "clientfiles",
+        "imagenet",
+        "imread",
+        "imshow",
+        "imwrite",
+        "inferencing",
+        "keras",
+        "MNIST",
+        "pythonimage",
+        "resutls",
+        "torchvision",
+        "unsqueeze"
+    ]
 }
