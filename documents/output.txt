@@ -1,1 +1,1 @@
-pythonimage: 3
+pythonimage: 1
