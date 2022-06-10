@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 import torch
 import VGG11
-import torchvision.transforms as transforms
+#import torchvision.transforms as transforms
 
 extension = "png"
 image_name = "pythonimage."+extension
@@ -32,7 +32,6 @@ while recv_data:
           break
 
 image2 = Image.open(file_stream)
-#image = image.filter(ImageFilter.GaussianBlur(radius=10)) Line caused AI error
 image2.save('clientfiles/'+image_name, format = 'PNG')
 
 end = time.time() 
@@ -51,8 +50,8 @@ model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 start3 = time.time()
 
-transform = transforms.ToTensor()
-tensor = transform(image2)
+tensor = torch.from_numpy(np.array(image2))
+
 tensor = tensor.unsqueeze_(0)
 print("Shape of tensor: " + str(tensor.shape))
 

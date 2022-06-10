@@ -5,8 +5,8 @@ import cv2
 
 BUFFER_SIZE = 4096
 #HOST = "192.168.1.154"  # The server's hostname or IP address
-#HOST = "192.168.1.153" #Raspberry PI
-HOST = "127.0.0.1" #Localhost if needed 
+HOST = "192.168.1.159" #Raspberry PI
+#HOST = "127.0.0.1" #Localhost if needed 
 PORT = 4567  # The port used by the server
 extension = "png"
 image_name = "pythonimage."+extension
