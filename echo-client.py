@@ -5,9 +5,10 @@ import cv2
 
 BUFFER_SIZE = 4096
 #HOST = "192.168.1.154"  # The server's hostname or IP address
-HOST = "192.168.1.159" #Raspberry PI
+HOST = "192.168.1.158" #Raspberry PI
 #HOST = "127.0.0.1" #Localhost if needed 
-PORT = 4567  # The port used by the server
+PORT = 6677
+  # The port used by the server
 extension = "png"
 image_name = "pythonimage."+extension
 
@@ -17,7 +18,7 @@ orig_img = cv2.imread('documents/9.png',0)
     # convert to grayscale to make the image single channel
         
         
-#image1 = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
+# image1 = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
 image1 = cv2.resize(orig_img,(224,224))
 
 cv2.imwrite(f"documents/9.png", image1)

@@ -12,7 +12,8 @@ extension = "png"
 image_name = "pythonimage."+extension
     
 #HOST = "192.168.1.154"  # Standard loopback interface address (localhost)
-HOST = "127.0.0.1" #Localhost
+#HOST = "127.0.0.1" #Localhost
+HOST = '0.0.0.0'
 PORT = 4567  # Port to listen on (non-privileged ports are > 1023)
 BUFFER_SIZE = 4096
 
