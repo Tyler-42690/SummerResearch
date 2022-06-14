@@ -1,5 +1,5 @@
 # echo-client.py
-import time
+#import time
 import socket
 import cv2
 
@@ -22,26 +22,21 @@ image1 = cv2.cvtColor(orig_img, cv2.COLOR_BGR2GRAY)
 image1 = cv2.resize(orig_img,(224,224))
 
 cv2.imwrite(f"documents/9.png", image1)
-
+#start = time.time()
 with open('documents/9.png', 'rb') as file:
-    
-    # add one extra batch dimension
-    
     file_data = file.read(BUFFER_SIZE)
     while file_data:
         client_socket.send(file_data)
         file_data = file.read(BUFFER_SIZE)
-start = time.time()
-client_socket.send(b"%IMAGE_COMPLETED%")
-
+file.close()
+#print("Data transfer time: " + str(time.time()-start))
 #Receives Modified Image Scored by AI
 with open('documents/output.txt', 'wb') as file:
     recv_data = client_socket.recv(BUFFER_SIZE)
     while recv_data:
         file.write(recv_data)
         recv_data = client_socket.recv(BUFFER_SIZE)
-
-        if recv_data == b"%IMAGE_COMPLETED%":
-            break
-end = time.time()
-print("Runtime = "+str(end-start))
+file.close()
+client_socket.close()
+#end = time.time()
+#print("Runtime = "+str(end-start))
