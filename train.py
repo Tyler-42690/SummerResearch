@@ -10,6 +10,7 @@ from VGG11 import VGG11
 matplotlib.style.use('ggplot')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 print(f"[INFO]: Computation device: {device}")
 epochs = 10
 batch_size = 32
