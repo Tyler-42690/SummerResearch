@@ -1,24 +1,30 @@
 import socket
 import time
-import numpy as np
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.applications.vgg19 import preprocess_input, decode_predictions
-from tensorflow.keras.applications import VGG16
+import torchvision.transforms as transforms
+import VGG11
+import torch
+from PIL import Image
 
 BUFFER_SIZE = 2048
 
-def preprocess(filename : str):
-    img = image.load_img(filename, color_mode='rgb', target_size=(224,224))
-    array = image.img_to_array(img)
-    array = np.expand_dims(array, axis = 0)
-    array = preprocess_input(array)
-    return array
+def load_model(mode : str):
+    model = VGG11.VGG11(in_channels=1, num_classes=10)
+    checkpoint = torch.load('model.pth')
+# load the trained weights
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.to(mode)
+    return model
 
-def predictions(array):
-    model = VGG16(weights='imagenet')
-    features = model.predict(array)
-    return decode_predictions(features)
-
+def conversion_to_tensor(img : Image.Image, mode : str = 'cpu'):
+    transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5],
+                         std=[0.5])
+])  
+    img1 = transform(img)
+    img1 = img1.unsqueeze(0).to(mode)
+    return img1
 
 def bind():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,9 +56,10 @@ def main():
     client = bind()
     start = time.time()
     receive_file("clientfiles/9.png", client)
-    array = preprocess('clientfiles/9.png')
+    model = load_model('cpu') 
+    tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     file = open('clientfiles/output.txt', 'w')
-    file.write(f"{'pythonimage'}: {predictions(array)}")
+    file.write(f"{'pythonimage'}: {model(tensor)}")
     file.close()
     send_file("clientfiles/output.txt", client)
     client.close()

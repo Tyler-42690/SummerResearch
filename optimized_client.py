@@ -34,11 +34,13 @@ def receive_file(filename : str, s : socket.socket):
 
 def main():
     client = connect()
+    start = time.time()
     orig_img = cv2.imread('documents/9.png')
     modify_img(orig_img)
     send_file("documents/9.png", client)
     receive_file("documents/output.txt", client)
     client.close()
+    print("Runtime :"+ str(time.time()-start)+ " seconds")
 
 if __name__ == '__main__':
     main()
