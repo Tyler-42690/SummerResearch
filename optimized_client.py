@@ -6,7 +6,7 @@ BUFFER_SIZE = 2048
 
 def connect():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('localhost',6677))
+    client.connect(('192.168.1.153',6677))
     return client
 
 def modify_img(img : cv2.Mat):

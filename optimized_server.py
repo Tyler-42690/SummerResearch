@@ -28,7 +28,8 @@ def conversion_to_tensor(img : Image.Image, mode : str = 'cpu'):
 
 def bind():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('localhost',6677))
+    server.bind(('192.168.1.153',6677))
+    #server.settimeout(10.0)
     server.listen()
     return server.accept()[0]
 
