@@ -7,7 +7,7 @@ from PIL import Image
 
 BUFFER_SIZE = 2048
 
-def load_model(mode : str):
+def load_model(mode : str = 'cpu'):
     model = VGG11.VGG11(in_channels=1, num_classes=10)
     checkpoint = torch.load('model.pth')
 # load the trained weights
@@ -28,8 +28,7 @@ def conversion_to_tensor(img : Image.Image, mode : str = 'cpu'):
 
 def bind():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('192.168.1.153',6677))
-    #server.settimeout(10.0)
+    server.bind(('localhost',6677))
     server.listen()
     return server.accept()[0]
 
@@ -57,7 +56,7 @@ def main():
     client = bind()
     start = time.time()
     receive_file("clientfiles/9.png", client)
-    model = load_model('cpu') 
+    model = load_model() 
     tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     file = open('clientfiles/output.txt', 'w')
     file.write(f"{'pythonimage'}: {model(tensor)}")
