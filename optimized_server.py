@@ -34,7 +34,7 @@ def send_file(filename : str, s : socket.socket):
     while image_data:
         s.send(image_data)
         image_data = file.read(BUFFER_SIZE)
-        
+    s.send(b"%IMAGE_COMPLETED%")    
     file.close()
 
 def receive_file(filename : str, s : socket.socket):

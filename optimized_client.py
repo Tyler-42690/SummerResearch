@@ -29,7 +29,8 @@ def receive_file(filename : str, s : socket.socket):
     while image_chunk:
         file.write(image_chunk)
         image_chunk = s.recv(BUFFER_SIZE)
-      
+        if image_chunk == b"%IMAGE_COMPLETED%":
+          break
     file.close()
 
 def main():
