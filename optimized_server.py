@@ -1,27 +1,23 @@
 import socket
 import time
 import torchvision.transforms as transforms
-import VGG11
-import torch
+import torchvision.models as models
 from PIL import Image
 
 BUFFER_SIZE = 2048
 
 def load_model(mode : str = 'cpu'):
-    model = VGG11.VGG11(in_channels=1, num_classes=10)
-    checkpoint = torch.load('model.pth')
-# load the trained weights
-    model.load_state_dict(checkpoint['model_state_dict'])
+    model = models.vgg19(pretrained=True)
+    model.eval()
     model.to(mode)
     return model
 
 def conversion_to_tensor(img : Image.Image, mode : str = 'cpu'):
     transform = transforms.Compose([
-    transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5],
-                         std=[0.5])
-])  
+    transforms.Normalize(mean=[0.5, 0.5, 0.5],
+                                 std=[0.5, 0.5, 0.5]),
+    ])  
     img1 = transform(img)
     img1 = img1.unsqueeze(0).to(mode)
     return img1

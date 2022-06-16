@@ -10,8 +10,8 @@ def connect():
     return client
 
 def modify_img(img : cv2.Mat):
-    image1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    image1 = cv2.resize(image1,(224,224))
+    #image1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    image1 = cv2.resize(img,(224,224))
     cv2.imwrite(f"documents/9.png", image1)
 
 def send_file(filename : str, s : socket.socket):
