@@ -49,17 +49,20 @@ def receive_file(filename : str, s : socket.socket):
     file.close()
 
 def main():
+    model = load_model() 
     client = bind()
     start = time.time()
     receive_file("clientfiles/9.png", client)
-    model = load_model() 
+    start1 = time.time()
     tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     file = open('clientfiles/output.txt', 'w')
+    start2 = time.time()
     file.write(f"{'pythonimage'}: {model(tensor)}")
     file.close()
     send_file("clientfiles/output.txt", client)
     client.close()
     print("Runtime: "+ str(time.time()-start)+ " seconds")
-
+    print("Runtime1: "+ str(time.time()-start1)+ " seconds")
+    print("Runtime2: "+ str(time.time()-start2)+ " seconds")
 if __name__ == '__main__':
     main()
