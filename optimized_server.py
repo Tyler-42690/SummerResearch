@@ -7,7 +7,7 @@ from PIL import Image
 BUFFER_SIZE = 2048
 
 def load_model(mode : str = 'cpu'):
-    model = models.vgg19(pretrained=True)
+    model = models.squeezenet1_1(pretrained=True)
     model.eval()
     model.to(mode)
     return model
