@@ -3,6 +3,7 @@ import time
 import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
+import torch
 
 BUFFER_SIZE = 2048
 
@@ -72,7 +73,8 @@ def main():
     tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     file = open('clientfiles/output.txt', 'w')
     start2 = time.time()
-    file.write(f"{'pythonimage'}: {model(tensor)}")
+    outputs = model(tensor)[0]
+    file.write(f"{'pythonimage'}: {torch.nn.functional.softmax(outputs, dim=0)}")
     file.close()
     send_file("clientfiles/output.txt", client)
     client.close()
