@@ -16,8 +16,21 @@ def modify_img(img : cv2.Mat):
 
 def send_file(filename : str, s : socket.socket):
     file = open(filename,'rb')
+    start = time.time()
+    transmitted = 0
+    bytes_transmitted = 0
     image_data = file.read(BUFFER_SIZE)
+    bytes_transmitted = len(image_data)
     while image_data:
+        transmitted += bytes_transmitted
+        elapsed = int(time.time()-start)
+        if elapsed > 1:
+            expected_transmit = BUFFER_SIZE * elapsed
+            transmit_delta = transmitted - expected_transmit
+            if transmit_delta > 0:
+                time.sleep(float(transmit_delta)/BUFFER_SIZE)
+                transmitted = 0
+                start = time.time()
         s.send(image_data)
         image_data = file.read(BUFFER_SIZE)
     s.send(b"%IMAGE_COMPLETED%")     
