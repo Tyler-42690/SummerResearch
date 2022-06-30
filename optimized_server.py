@@ -4,16 +4,36 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 import torch
+import os
+import cv2
 
+
+import config
 BUFFER_SIZE = 2048
 
-def load_model(mode : str = 'cpu'):
+c = config.Config()
+BANDWIDTH_BYTES = int(c.BANDWIDTH_MB) * 2**20
+FRAMEWORK = c.FRAMEWORK
+MODEL = c.MODEL
+MODE = c.INF_MODE
+
+def warmup(model):
+    orig_img = cv2.imread('documents/9.png')
+    image1 = cv2.resize(orig_img,(224,224))
+    cv2.imwrite(f"documents/warmup.png", image1)
+    tensor = conversion_to_tensor(Image.open('documents/warmup.png'))
+    for i in range(5):
+        model(tensor)
+
+def load_model(mode : str = MODE):
     model = models.squeezenet1_1(pretrained=True)
     model.eval()
     model.to(mode)
+    #warmup loop for fairness
+    warmup(model)
     return model
 
-def conversion_to_tensor(img : Image.Image, mode : str = 'cpu'):
+def conversion_to_tensor(img : Image.Image, mode : str = MODE):
     transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5],
@@ -30,56 +50,50 @@ def bind():
     return server.accept()[0]
 
 def send_file(filename : str, s : socket.socket):
-    file = open(filename,'rb')
-    start = time.time()
-    transmitted = 0
-    bytes_transmitted = 0
-    image_data = file.read(BUFFER_SIZE)
-    bytes_transmitted = len(image_data) 
-    while image_data:
-        transmitted += bytes_transmitted
-        elapsed = int(time.time()-start)
-        if elapsed > 1:
-            expected_transmit = BUFFER_SIZE * elapsed
-            transmit_delta = transmitted - expected_transmit
-            if transmit_delta > 0:
-                time.sleep(float(transmit_delta)/BUFFER_SIZE)
-                transmitted = 0
-                start = time.time()
+    with open(filename,'rb') as file:
+        while True:
+            image_data = file.read(BUFFER_SIZE)
+            s.send(image_data)
+            if len(image_data) < BUFFER_SIZE:
+                break
 
-        s.send(image_data)
-        image_data = file.read(BUFFER_SIZE)
-        bytes_transmitted += len(image_data) 
-    s.send(b"%IMAGE_COMPLETED%")    
-    file.close()
 
 def receive_file(filename : str, s : socket.socket):
-    file = open(filename,'wb')
-    image_chunk = s.recv(BUFFER_SIZE)
-    while image_chunk:
-        file.write(image_chunk)
-        image_chunk = s.recv(BUFFER_SIZE)
-        if image_chunk == b"%IMAGE_COMPLETED%":
-          break
-        
-    file.close()
+    with open(filename,'wb') as file:
+        while True:
+            image_chunk = s.recv(BUFFER_SIZE)
+            file.write(image_chunk)
+            if len(image_chunk) < BUFFER_SIZE:
+                break
 
+        
 def main():
     model = load_model() 
     client = bind()
     start = time.time()
     receive_file("clientfiles/9.png", client)
-    start1 = time.time()
+    upload_timer = time.time()
     tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
-    file = open('clientfiles/output.txt', 'w')
-    start2 = time.time()
+    process_timer = time.time()
     outputs = model(tensor)[0]
-    file.write(f"{'pythonimage'}: {torch.nn.functional.softmax(outputs, dim=0)}")
-    file.close()
+    with open('clientfiles/output.txt', 'w') as file:
+        file.write(f"{'pythonimage'}: {torch.nn.functional.softmax(outputs, dim=0)}")
+    inference_timer = time.time()
     send_file("clientfiles/output.txt", client)
     client.close()
-    print("Runtime: "+ str(time.time()-start)+ " seconds")
-    print("Runtime1: "+ str(time.time()-start1)+ " seconds")
-    print("Runtime2: "+ str(time.time()-start2)+ " seconds")
+    download_timer = time.time()
+    upload_delay = os.path.getsize("clientfiles/9.png")/BANDWIDTH_BYTES - (upload_timer-start)
+    upload_delay = upload_delay if upload_delay > 0 else 0
+    download_delay = os.path.getsize("clientfiles/output.txt")/BANDWIDTH_BYTES - (download_timer-inference_timer)
+    download_delay = download_delay if download_delay > 0 else 0
+    time.sleep(upload_delay + download_delay)
+    print(f"Upload: {(upload_timer - start):.04f} seconds")
+    print(f"Upload_artificial: {(upload_delay):.04f} seconds")
+    print(f"Processing: {(process_timer - upload_timer):0.4f} seconds")
+    print(f"Inference: {(inference_timer - process_timer):0.4f} seconds")
+    print(f"Download: {(download_timer - inference_timer):0.4f} seconds")
+    print(f"Download_artificial: {(download_delay):0.4f} seconds")
+    print(f"Overall: {(time.time() - start):0.4f}")
+
 if __name__ == '__main__':
     main()
