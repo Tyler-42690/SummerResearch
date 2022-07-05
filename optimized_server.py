@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 import torch
+import numpy as np
 import os
 import cv2
 
