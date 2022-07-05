@@ -10,7 +10,7 @@ def connect():
     client.connect(('localhost',6677))
     return client
 
-def modify_img(img : cv2.Mat):
+def modify_img(img):
     #image1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     image1 = cv2.resize(img,(224,224))
     cv2.imwrite(f"documents/9.png", image1)
