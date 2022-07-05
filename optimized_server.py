@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 import torchvision.models as models
 from PIL import Image
 import torch
+import numpy as np
 import os
 import cv2
 
@@ -12,21 +13,23 @@ import config
 BUFFER_SIZE = 2048
 
 c = config.Config()
-BANDWIDTH_BYTES = int(c.BANDWIDTH_MB) * 2**20
+BANDWIDTH_BYTES = float(c.BANDWIDTH_MB) * 2**20
 FRAMEWORK = c.FRAMEWORK
 MODEL = c.MODEL
 MODE = c.INF_MODE
 
 def warmup(model):
-    orig_img = cv2.imread('documents/9.png')
-    image1 = cv2.resize(orig_img,(224,224))
-    cv2.imwrite(f"documents/warmup.png", image1)
-    tensor = conversion_to_tensor(Image.open('documents/warmup.png'))
-    for i in range(5):
+    imarray = np.random.rand(*(224,224), 3) * 255
+    warmup_image = Image.fromarray(imarray.astype('uint8')).convert('RGB')
+    tensor = conversion_to_tensor(warmup_image)
+    for i in range(100):
         model(tensor)
+    print("Warmup complete.")
 
 def load_model(mode : str = MODE):
-    model = models.squeezenet1_1(pretrained=True)
+    model = models.mobilenet_v2(pretrained=True)
+    # model = models.squeezenet1_1(pretrained=True)
+    # model = models.alexnet(pretrained=True)
     model.eval()
     model.to(mode)
     #warmup loop for fairness
@@ -68,16 +71,22 @@ def receive_file(filename : str, s : socket.socket):
 
         
 def main():
-    model = load_model() 
+    model = load_model()
+    with open("imagenet_classes.txt", "r") as f:
+        categories = [s.strip() for s in f.readlines()]
     client = bind()
     start = time.time()
     receive_file("clientfiles/9.png", client)
     upload_timer = time.time()
     tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     process_timer = time.time()
-    outputs = model(tensor)[0]
+    predictions = model(tensor)[0]
+    probabilities = torch.nn.functional.softmax(predictions[0], dim=0)
+    # Show top categories per image
+    top1_prob, top1_catid = torch.topk(probabilities, 1)
+    prediction = categories[top1_catid]
     with open('clientfiles/output.txt', 'w') as file:
-        file.write(f"{'pythonimage'}: {torch.nn.functional.softmax(outputs, dim=0)}")
+        file.write(f"{'pythonimage'}: {prediction}")
     inference_timer = time.time()
     send_file("clientfiles/output.txt", client)
     client.close()
