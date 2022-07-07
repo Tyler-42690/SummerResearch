@@ -18,7 +18,7 @@ FRAMEWORK = c.FRAMEWORK
 MODEL = c.MODEL
 MODE = c.INF_MODE
 
-warmup_count = 100 if MODE = 'cuda' else 1
+warmup_count = 100 if MODE == 'cuda' else 1
 server = None
 
 def warmup(model):
@@ -133,7 +133,7 @@ def test_loop():
         tensor = conversion_to_tensor(Image.open('clientfiles/9.png'))
     process_timer = time.time()
     predictions = None
-    for i in range(100)):
+    for i in range(100):
         predictions = model(tensor)[0]
     probabilities = torch.nn.functional.softmax(predictions[0], dim=0)
     # Show top categories per image
