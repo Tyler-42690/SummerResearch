@@ -1,6 +1,6 @@
 {
-    "BANDWIDTH_MB": "1", 
+    "BANDWIDTH_MB": "10", 
     "FRAMEWORK": "torch",
-    "MODEL": "SqueezeNet", 
-    "INF_MODE": "cpu"
+    "MODEL": "AlexNet", 
+    "INF_MODE": "cuda"
 }

@@ -7,9 +7,10 @@ import torch
 import numpy as np
 import os
 import cv2
-
+from PIL import ImageFile
 import numpy as np
 import config
+import model_wrapper
 BUFFER_SIZE = 2048
 
 c = config.Config()
@@ -17,7 +18,7 @@ BANDWIDTH_BYTES = float(c.BANDWIDTH_MB) * 2**20
 FRAMEWORK = c.FRAMEWORK
 MODEL = c.MODEL
 MODE = c.INF_MODE
-
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 warmup_count = 100 if MODE == 'cuda' else 1
 server = None
 
@@ -32,15 +33,16 @@ def warmup(model):
         _ = model(tensor)
 
 def load_model(mode : str = MODE):
-    # model = models.squeezenet1_1(pretrained=True)
-    # model = models.mobilenet_v3_small(pretrained=True)
-    model = models.vgg16(pretrained=True)
-    # model = models.alexnet(pretrained=True)
-    model.eval()
-    model.to(mode)
+    #model = models.squeezenet1_1(pretrained=True)
+    #model = models.mobilenet_v3_small(pretrained=True)
+    #model = models.vgg16(pretrained=True)
+    #model = models.alexnet(pretrained=True)
+    model = model_wrapper.Model()
+    #model.eval()
+    #model.to(mode)
     #warmup loop for fairness
-    warmup(model)
-    print("Ready for Client.")
+    #warmup(model)
+    #print("Ready for Client.")
     return model
 
 def conversion_to_tensor(img : Image.Image, mode : str = MODE):
@@ -55,7 +57,7 @@ def conversion_to_tensor(img : Image.Image, mode : str = MODE):
 def bind():
     global server
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('localhost',6677))
+    server.bind(('',6677))
     server.listen()
     return server.accept()[0]
 
@@ -134,7 +136,7 @@ def test_loop():
     process_timer = time.time()
     predictions = None
     for i in range(100):
-        predictions = model(tensor)[0]
+        predictions = model.model(tensor)[0]
     probabilities = torch.nn.functional.softmax(predictions[0], dim=0)
     # Show top categories per image
     top1_prob, top1_catid = torch.topk(probabilities, 1)
