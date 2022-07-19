@@ -1,6 +1,6 @@
 {
     "BANDWIDTH_MB": "10", 
     "FRAMEWORK": "torch",
-    "MODEL": "AlexNet", 
+    "MODEL": "MobileNet", 
     "INF_MODE": "cuda"
 }

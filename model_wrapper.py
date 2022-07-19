@@ -3,22 +3,31 @@ import numpy as np
 from PIL import Image
 import torch
 from torchvision import transforms, models
+#from yolov7.models import yolo 
 
 c = config.Config()
 selected_model = c.MODEL 
 selected_mode = c.INF_MODE
 image_size = (224,224)
-
+selected = False
+model = None
 if selected_model == "AlexNet":
     selected_model ="alexnet"
+    selected = True
 elif selected_model == "SqueezeNet":
     selected_model= "squeezenet1_1"
+    selected = True
 elif selected_model == "MobileNet":
-    selected_model ="mobilenet_v3s"
+    selected_model ="mobilenet_v3_small"
+    selected = True
 elif selected_model == "VGG":
     selected_model = "vgg16"
+    selected = True
+model = torch.hub.load('pytorch/vision:v0.11.0', selected_model, pretrained=True) if selected else None
 
-model = torch.hub.load('pytorch/vision:v0.11.0', selected_model, pretrained=True)
+#if selected_model == "YOLO":
+    #model = yolo.model()
+   # model.load_state_dict(torch.load('yolov7.pt'))
 
 preprocess = transforms.Compose([
     transforms.Resize(256),
